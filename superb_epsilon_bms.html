@@ -476,6 +476,11 @@ async function toggleConnect() {
 }
 
 async function connect() {
+  if (!navigator.bluetooth) {
+    document.getElementById('banner').classList.remove('hidden');
+    setStatus('Web Bluetooth nicht unterstützt');
+    return;
+  }
   if (isConnecting) return;
   isConnecting = true;
   setButtonState('connecting');
@@ -816,7 +821,7 @@ function checkBleSupport() {
   }
 }
 
-setTimeout(checkBleSupport, 500);
+// BLE check deferred to connect button
 </script>
 </body>
 </html>
