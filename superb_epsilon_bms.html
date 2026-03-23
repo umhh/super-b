@@ -818,6 +818,7 @@ function checkBleSupport() {
 
 // BLE check deferred to connect button
 document.getElementById('btn-connect').addEventListener('click', toggleConnect);
+setStatus('JS OK · BLE: ' + (navigator.bluetooth ? 'ja' : 'nein'));
 </script>
 </body>
 </html>
