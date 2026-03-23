@@ -518,13 +518,8 @@ async function connect() {
     }
 
   } catch (err) {
-    if (err.name !== 'NotFoundError' && err.name !== 'AbortError') {
-      // NotFoundError = user cancelled picker, AbortError = cancelled
-      console.error(err);
-      setStatus('Fehler: ' + err.message);
-    } else {
-      setStatus('Nicht verbunden');
-    }
+    console.error(err);
+    setStatus('Fehler: ' + err.name + ' – ' + err.message);
     setButtonState('disconnected');
     bleDevice = null;
   } finally {
