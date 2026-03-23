@@ -437,6 +437,13 @@
 </footer>
 
 <script>
+window.onerror = function(msg, src, line, col, err) {
+  var el = document.getElementById('status-text');
+  if (el) el.textContent = 'Fehler Z.' + line + ': ' + msg;
+};
+document.getElementById('status-text').textContent = 'Script lädt...';
+</script>
+<script>
 'use strict';
 
 // ─── UUIDs & Protokoll ──────────────────────────────────────────────────────
