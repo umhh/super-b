@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Super-B Epsilon BMS</title>
+  <style>
+    :root {
+      --bg:      #0d1117;
+      --surface: #161b22;
+      --border:  #30363d;
+      --text:    #e6edf3;
+      --muted:   #7d8590;
+      --green:   #3fb950;
+      --yellow:  #d29922;
+      --red:     #f85149;
+      --blue:    #58a6ff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+      min-height: 100dvh;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      padding-top: max(16px, env(safe-area-inset-top));
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header h1 {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    header p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── Connect Button ── */
+    #btn-connect {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #btn-connect:active { opacity: 0.7; }
+    #btn-connect.connected { background: var(--red); }
+    #btn-connect.connecting { background: var(--yellow); }
+    #btn-connect:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── Bluefy Banner ── */
+    #banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: #1c2128;
+      border: 1px solid #d29922;
+      border-radius: 12px;
+      margin: 16px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    #banner.hidden { display: none; }
+
+    #banner strong { color: var(--yellow); }
+
+    #banner-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+
+    /* ── Main Content ── */
+    main {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ── SOC Gauge ── */
+    .gauge-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .gauge-wrap {
+      position: relative;
+      width: 160px;
+      height: 160px;
+    }
+
+    .gauge-wrap svg {
+      transform: rotate(-90deg);
+    }
+
+    .gauge-bg {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 10;
+    }
+
+    .gauge-arc {
+      fill: none;
+      stroke: var(--green);
+      stroke-width: 10;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.6s ease, stroke 0.6s ease;
+    }
+
+    .gauge-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gauge-value {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .gauge-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: -2px;
+    }
+
+    .gauge-meta {
+      display: flex;
+      gap: 32px;
+    }
+
+    .gauge-meta-item {
+      text-align: center;
+    }
+
+    .gauge-meta-item .val {
+      font-size: 18px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .gauge-meta-item .lbl {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── Data Grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 14px;
+    }
+
+    .card-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .card-value {
+      font-size: 24px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+
+    .card-unit {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--muted);
+      margin-left: 2px;
+    }
+
+    .card-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Colors */
+    .val-green  { color: var(--green); }
+    .val-yellow { color: var(--yellow); }
+    .val-red    { color: var(--red); }
+    .val-blue   { color: var(--blue); }
+
+    /* ── Status Badges ── */
+    .status-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid transparent;
+    }
+
+    .badge-green  { background: rgba(63,185,80,.15); color: var(--green);  border-color: rgba(63,185,80,.3);  }
+    .badge-yellow { background: rgba(210,153,34,.15); color: var(--yellow); border-color: rgba(210,153,34,.3); }
+    .badge-red    { background: rgba(248,81,73,.15);  color: var(--red);    border-color: rgba(248,81,73,.3);  }
+    .badge-muted  { background: rgba(125,133,144,.1); color: var(--muted);  border-color: rgba(125,133,144,.2); }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* ── Placeholder / Disconnected ── */
+    #placeholder {
+      text-align: center;
+      padding: 48px 32px;
+      color: var(--muted);
+    }
+
+    #placeholder .icon {
+      font-size: 52px;
+      margin-bottom: 16px;
+    }
+
+    #placeholder p {
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* ── Footer ── */
+    footer {
+      padding: 12px 20px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+
+    #status-text {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    #last-update {
+      margin-top: 3px;
+    }
+
+    /* ── Loading spinner ── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    /* ── Data hidden initially ── */
+    #data-section { display: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Super-B Epsilon BMS</h1>
+    <p id="status-text">Nicht verbunden</p>
+  </div>
+  <button id="btn-connect" onclick="toggleConnect()">
+    Verbinden
+  </button>
+</header>
+
+<!-- Bluefy hint (shown on iOS Safari) -->
+<div id="banner">
+  <span id="banner-icon">&#9888;&#65039;</span>
+  <div>
+    <strong>Web Bluetooth nicht verfügbar</strong><br>
+    Safari unterstützt kein Web Bluetooth. Bitte installiere
+    <strong><a href="https://apps.apple.com/app/bluefy-web-ble-browser/id1492822055"
+       style="color:var(--yellow)">Bluefy</a></strong>
+    aus dem App Store und öffne diese Seite dort.
+  </div>
+</div>
+
+<main>
+
+  <!-- Disconnected placeholder -->
+  <div id="placeholder">
+    <div class="icon">&#128267;</div>
+    <p>Tippe auf <strong>Verbinden</strong>, um dein<br>Super-B Epsilon BMS zu finden.</p>
+  </div>
+
+  <!-- Live data (hidden until connected + data received) -->
+  <div id="data-section">
+
+    <!-- SOC Gauge + Voltage/Current summary -->
+    <div class="gauge-card">
+      <div class="gauge-wrap">
+        <svg viewBox="0 0 160 160" width="160" height="160">
+          <circle class="gauge-bg" cx="80" cy="80" r="66"/>
+          <circle class="gauge-arc" id="soc-arc" cx="80" cy="80" r="66"
+                  stroke-dasharray="414.69" stroke-dashoffset="414.69"/>
+        </svg>
+        <div class="gauge-center">
+          <span class="gauge-value" id="soc-val">—</span>
+          <span class="gauge-label">SoC</span>
+        </div>
+      </div>
+      <div class="gauge-meta">
+        <div class="gauge-meta-item">
+          <div class="val" id="voltage-summary">—</div>
+          <div class="lbl">Spannung V</div>
+        </div>
+        <div class="gauge-meta-item">
+          <div class="val" id="current-summary">—</div>
+          <div class="lbl">Strom A</div>
+        </div>
+        <div class="gauge-meta-item">
+          <div class="val" id="power-summary">—</div>
+          <div class="lbl">Leistung W</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics grid -->
+    <div class="grid">
+
+      <div class="card">
+        <div class="card-label">Gesundheit</div>
+        <div class="card-value" id="soh-val">—<span class="card-unit">%</span></div>
+        <div class="card-sub">State of Health</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Restlaufzeit</div>
+        <div class="card-value" id="runtime-val">—</div>
+        <div class="card-sub" id="runtime-sub">bei aktuellem Verbrauch</div>
+      </div>
+
+      <div class="card" id="cycles-card">
+        <div class="card-label">Ladezyklen</div>
+        <div class="card-value" id="cycles-val">—</div>
+        <div class="card-sub">Zyklen</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Version</div>
+        <div class="card-value val-blue" id="version-val" style="font-size:20px">—</div>
+        <div class="card-sub" id="device-name">Epsilon</div>
+      </div>
+
+    </div>
+
+    <!-- Status badges -->
+    <div class="card">
+      <div class="card-label" style="margin-bottom:10px">Status</div>
+      <div class="status-row" id="badge-row">
+        <div class="badge badge-muted" id="badge-charging">
+          <div class="badge-dot"></div> Lade-Status
+        </div>
+        <div class="badge badge-muted" id="badge-problem">
+          <div class="badge-dot"></div> OK
+        </div>
+        <div class="badge badge-muted" id="badge-balancer">
+          <div class="badge-dot"></div> Balancer
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /data-section -->
+
+</main>
+
+<footer>
+  <div id="last-update">Noch keine Daten</div>
+  <div style="margin-top:4px; opacity:0.5">Super-B Epsilon BMS Web Reader</div>
+</footer>
+
+<script>
+'use strict';
+
+// ─── UUIDs & Protokoll ──────────────────────────────────────────────────────
+
+const UUID = {
+  v1: {
+    service: '74b9c2d1-dc6d-42cf-a2e9-7398b8fc2e70',
+    notify:  '6edadbe4-4f53-4a5a-96ed-02f93db93790',
+  },
+  v2: {
+    service:  'cf9ccdf7-eee9-43ce-87a5-82b54af5324e',
+    txrx:     'cf9ccdfa-eee9-43ce-87a5-82b54af5324e',
+    notify2:  'e0fef452-9d2b-4005-a1e3-69fe1102b436',
+  },
+};
+
+const CMD_V2_QUERY = new Uint8Array([0x21, 0x54, 0x00]);
+const POLL_INTERVAL_MS = 30_000;
+
+// ─── State ──────────────────────────────────────────────────────────────────
+
+let bleDevice    = null;
+let gattServer   = null;
+let bmsVersion   = null;   // 'v1' | 'v2'
+let pollTimer    = null;
+let v2Frame0     = null;
+let v2Frame2     = null;
+let isConnecting = false;
+
+// ─── BLE Verbindung ──────────────────────────────────────────────────────────
+
+async function toggleConnect() {
+  if (bleDevice && bleDevice.gatt.connected) {
+    disconnect();
+  } else {
+    await connect();
+  }
+}
+
+async function connect() {
+  if (isConnecting) return;
+  isConnecting = true;
+  setButtonState('connecting');
+  setStatus('Suche Gerät...');
+
+  try {
+    bleDevice = await navigator.bluetooth.requestDevice({
+      filters: [
+        { services: [UUID.v1.service] },
+        { services: [UUID.v2.service] },
+        { namePrefix: 'Epsilon' },
+      ],
+      optionalServices: [UUID.v1.service, UUID.v2.service],
+    });
+
+    bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
+
+    setStatus('Verbinde...');
+    gattServer = await bleDevice.gatt.connect();
+
+    // Version auto-detect: erst v2 probieren, dann v1
+    bmsVersion = await detectVersion(gattServer);
+    if (!bmsVersion) throw new Error('BMS-Service nicht gefunden.');
+
+    setStatus(`Verbunden · ${bmsVersion.toUpperCase()}`);
+    setButtonState('connected');
+
+    document.getElementById('version-val').textContent = bmsVersion.toUpperCase();
+    document.getElementById('device-name').textContent = bleDevice.name || 'Epsilon';
+
+    if (bmsVersion === 'v1') {
+      await setupV1(gattServer);
+    } else {
+      await setupV2(gattServer);
+    }
+
+  } catch (err) {
+    if (err.name !== 'NotFoundError' && err.name !== 'AbortError') {
+      // NotFoundError = user cancelled picker, AbortError = cancelled
+      console.error(err);
+      setStatus('Fehler: ' + err.message);
+    } else {
+      setStatus('Nicht verbunden');
+    }
+    setButtonState('disconnected');
+    bleDevice = null;
+  } finally {
+    isConnecting = false;
+  }
+}
+
+async function detectVersion(server) {
+  try {
+    await server.getPrimaryService(UUID.v2.service);
+    return 'v2';
+  } catch (_) {}
+  try {
+    await server.getPrimaryService(UUID.v1.service);
+    return 'v1';
+  } catch (_) {}
+  return null;
+}
+
+function disconnect() {
+  clearInterval(pollTimer);
+  pollTimer = null;
+  if (bleDevice && bleDevice.gatt.connected) {
+    bleDevice.gatt.disconnect();
+  }
+}
+
+function onDisconnected() {
+  clearInterval(pollTimer);
+  pollTimer = null;
+  gattServer = null;
+  setButtonState('disconnected');
+  setStatus('Verbindung getrennt');
+}
+
+// ─── V1 Setup ────────────────────────────────────────────────────────────────
+
+async function setupV1(server) {
+  const svc  = await server.getPrimaryService(UUID.v1.service);
+  const chr  = await svc.getCharacteristic(UUID.v1.notify);
+  chr.addEventListener('characteristicvaluechanged', (e) => {
+    handleV1Frame(e.target.value);
+  });
+  await chr.startNotifications();
+  setStatus('Verbunden · V1 · Warte auf Daten...');
+}
+
+function handleV1Frame(view) {
+  if (view.byteLength !== 20) {
+    console.warn('[V1] Ungültige Frame-Länge:', view.byteLength);
+    return;
+  }
+
+  const status  = view.getUint8(1);
+  const soc     = view.getUint8(2);
+  const soh     = view.getUint8(3);
+  const runtime = view.getUint32(4, false);            // Big-Endian
+  const current = view.getFloat32(8, false);           // Big-Endian IEEE 754
+  const voltage = view.getFloat32(12, false);
+
+  updateUI({
+    soc,
+    soh,
+    voltage,
+    current,
+    power:     voltage * current,
+    runtime:   current >= 0 ? 0xFFFFFFFF : runtime,
+    charging:  current >= 0,
+    problem:   !(status & 0x01),
+    balancer:  !!(status & 0x80),
+    cycles:    null,
+  });
+}
+
+// ─── V2 Setup ────────────────────────────────────────────────────────────────
+
+async function setupV2(server) {
+  const svc     = await server.getPrimaryService(UUID.v2.service);
+  const chrTxRx = await svc.getCharacteristic(UUID.v2.txrx);
+  const chrN2   = await svc.getCharacteristic(UUID.v2.notify2);
+
+  chrTxRx.addEventListener('characteristicvaluechanged', handleV2Frame);
+  chrN2.addEventListener('characteristicvaluechanged',   handleV2Frame);
+
+  await chrTxRx.startNotifications();
+  await chrN2.startNotifications();
+
+  // Erste Abfrage sofort
+  await sendV2Query(chrTxRx);
+
+  // Periodisch wiederholen
+  pollTimer = setInterval(async () => {
+    if (!bleDevice || !bleDevice.gatt.connected) return;
+    try {
+      const s   = await gattServer.getPrimaryService(UUID.v2.service);
+      const chr = await s.getCharacteristic(UUID.v2.txrx);
+      await sendV2Query(chr);
+    } catch (err) {
+      console.warn('[V2] Poll-Fehler:', err);
+    }
+  }, POLL_INTERVAL_MS);
+}
+
+async function sendV2Query(chr) {
+  try {
+    await chr.writeValueWithResponse(CMD_V2_QUERY);
+  } catch (_) {
+    try {
+      await chr.writeValueWithoutResponse(CMD_V2_QUERY);
+    } catch (err) {
+      console.warn('[V2] Write fehlgeschlagen:', err);
+    }
+  }
+}
+
+function handleV2Frame(event) {
+  const view = event.target.value;
+  if (view.byteLength !== 24) {
+    console.warn('[V2] Ungültige Frame-Länge:', view.byteLength);
+    return;
+  }
+
+  const frameIdx = view.getUint8(0);
+
+  if (frameIdx === 0x00) {
+    v2Frame0 = view;
+  } else if (frameIdx === 0x02) {
+    v2Frame2 = view;
+  } else {
+    console.warn('[V2] Unbekannter Frame-Index:', frameIdx);
+    return;
+  }
+
+  // Sobald beide Frames da sind, anzeigen
+  if (v2Frame0 && v2Frame2) {
+    parseV2Frames();
+  }
+}
+
+function parseV2Frames() {
+  // Frame 0x00: SoC, Cycles, SoH, Runtime
+  const soc     = v2Frame0.getUint8(1);
+  const cycles  = v2Frame0.getUint8(18);
+  const soh     = v2Frame0.getUint8(19);
+  const runtime = v2Frame0.getUint32(20, false);  // Big-Endian
+
+  // Frame 0x02: Strom (int32 mA), Spannung (uint16 mV)
+  const currentMA  = v2Frame2.getInt32(6, false);   // Big-Endian signed
+  const voltageMV  = v2Frame2.getUint16(10, false);  // Big-Endian
+  const current    = currentMA / 1000.0;
+  const voltage    = voltageMV / 1000.0;
+
+  v2Frame0 = null;
+  v2Frame2 = null;
+
+  updateUI({
+    soc,
+    soh,
+    voltage,
+    current,
+    power:    voltage * current,
+    runtime,
+    charging: current >= 0,
+    problem:  false,
+    balancer: false,
+    cycles,
+  });
+}
+
+// ─── UI Update ───────────────────────────────────────────────────────────────
+
+const SOC_CIRCUMFERENCE = 2 * Math.PI * 66;  // r=66
+
+function updateUI(d) {
+  document.getElementById('placeholder').style.display    = 'none';
+  document.getElementById('data-section').style.display   = '';
+
+  // SOC Gauge
+  const soc    = Math.max(0, Math.min(100, d.soc));
+  const offset = SOC_CIRCUMFERENCE * (1 - soc / 100);
+  const arc    = document.getElementById('soc-arc');
+  arc.style.strokeDashoffset = offset;
+  arc.style.stroke = socColor(soc);
+  document.getElementById('soc-val').textContent      = soc + '%';
+  document.getElementById('soc-val').style.color      = socColor(soc);
+
+  // Voltage / Current / Power
+  document.getElementById('voltage-summary').textContent = fmt(d.voltage, 2);
+  document.getElementById('current-summary').textContent = fmt(Math.abs(d.current), 1);
+  document.getElementById('power-summary').textContent   = fmt(Math.abs(d.power), 0);
+
+  // SoH
+  const sohEl = document.getElementById('soh-val');
+  sohEl.innerHTML = d.soh + '<span class="card-unit">%</span>';
+  sohEl.className = 'card-value ' + (d.soh >= 80 ? 'val-green' : d.soh >= 60 ? 'val-yellow' : 'val-red');
+
+  // Runtime
+  const rtEl  = document.getElementById('runtime-val');
+  const rtSub = document.getElementById('runtime-sub');
+  if (d.runtime === 0xFFFFFFFF || d.runtime === 4294967295 || d.charging) {
+    rtEl.textContent  = '—';
+    rtSub.textContent = 'beim Laden';
+  } else {
+    rtEl.textContent  = formatRuntime(d.runtime);
+    rtSub.textContent = 'Restlaufzeit';
+  }
+
+  // Cycles (nur v2)
+  const cyclesCard = document.getElementById('cycles-card');
+  if (d.cycles !== null) {
+    document.getElementById('cycles-val').textContent = d.cycles;
+    cyclesCard.style.display = '';
+  } else {
+    cyclesCard.style.display = 'none';
+  }
+
+  // Badges
+  setBadge('badge-charging',
+    d.charging ? 'Lädt' : 'Entlädt',
+    d.charging ? 'badge-green' : 'badge-blue');
+
+  setBadge('badge-problem',
+    d.problem ? 'Problem!' : 'Kein Fehler',
+    d.problem ? 'badge-red' : 'badge-green');
+
+  setBadge('badge-balancer',
+    d.balancer ? 'Balancer aktiv' : 'Balancer inaktiv',
+    d.balancer ? 'badge-yellow' : 'badge-muted');
+
+  // Last update
+  const now = new Date();
+  document.getElementById('last-update').textContent =
+    'Zuletzt: ' + now.toLocaleTimeString('de-DE');
+}
+
+function setBadge(id, text, cls) {
+  const el = document.getElementById(id);
+  el.className = 'badge ' + cls;
+  el.innerHTML = '<div class="badge-dot"></div> ' + text;
+}
+
+function socColor(soc) {
+  if (soc >= 60) return 'var(--green)';
+  if (soc >= 25) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+function fmt(val, decimals) {
+  return isNaN(val) ? '—' : val.toFixed(decimals);
+}
+
+function formatRuntime(seconds) {
+  if (!seconds || seconds <= 0) return '—';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return h + 'h ' + m + 'm';
+  return m + 'm';
+}
+
+// ─── Button States ───────────────────────────────────────────────────────────
+
+function setButtonState(state) {
+  const btn = document.getElementById('btn-connect');
+  btn.classList.remove('connected', 'connecting');
+  btn.disabled = false;
+  if (state === 'connected') {
+    btn.classList.add('connected');
+    btn.innerHTML = 'Trennen';
+  } else if (state === 'connecting') {
+    btn.classList.add('connecting');
+    btn.innerHTML = '<span class="spinner"></span>';
+    btn.disabled = true;
+  } else {
+    btn.innerHTML = 'Verbinden';
+  }
+}
+
+function setStatus(text) {
+  document.getElementById('status-text').textContent = text;
+}
+
+// ─── Web Bluetooth Check ─────────────────────────────────────────────────────
+
+function checkBleSupport() {
+  const banner = document.getElementById('banner');
+  const btn    = document.getElementById('btn-connect');
+
+  if (!navigator.bluetooth) {
+    banner.classList.remove('hidden');
+    btn.disabled = true;
+    setStatus('Web Bluetooth nicht unterstützt');
+  } else {
+    banner.classList.add('hidden');
+  }
+}
+
+checkBleSupport();
+</script>
+</body>
+</html>
