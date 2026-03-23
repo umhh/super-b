@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -816,7 +817,10 @@ function checkBleSupport() {
   }
 }
 
-// BLE check deferred to connect button
+window.onerror = function(msg, src, line) {
+  document.getElementById('status-text').textContent = 'JS-Fehler: ' + msg + ' (Z.' + line + ')';
+};
+
 document.getElementById('btn-connect').addEventListener('click', toggleConnect);
 setStatus('JS OK · BLE: ' + (navigator.bluetooth ? 'ja' : 'nein'));
 </script>
