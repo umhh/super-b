@@ -324,7 +324,7 @@
     <h1>Super-B Epsilon BMS</h1>
     <p id="status-text">Nicht verbunden</p>
   </div>
-  <button id="btn-connect" onclick="toggleConnect()">
+  <button id="btn-connect">
     Verbinden
   </button>
 </header>
@@ -817,6 +817,7 @@ function checkBleSupport() {
 }
 
 // BLE check deferred to connect button
+document.getElementById('btn-connect').addEventListener('click', toggleConnect);
 </script>
 </body>
 </html>
