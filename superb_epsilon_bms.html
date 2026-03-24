@@ -433,15 +433,15 @@
 
 <footer>
   <div id="last-update">Noch keine Daten</div>
-  <div style="margin-top:4px; opacity:0.5">Super-B Epsilon BMS Web Reader · Build 2026-03-24 v6</div>
+  <div style="margin-top:4px; opacity:0.5">Super-B Epsilon BMS Web Reader · Build 2026-03-24 v7</div>
 </footer>
 
 <script>
 window.onerror = function(msg, src, line, col, err) {
-  if (msg === 'Script error.' || msg === 'Script error') return true;
   var detail = (err && err.message) ? err.message : msg;
   var el = document.getElementById('status-text');
-  if (el) el.textContent = detail + ' (Z.' + line + ')';
+  if (el) el.textContent += ' | ' + detail + ' Z.' + line;
+  return true;
 };
 document.getElementById('status-text').textContent = 'Script lädt...';
 </script>
@@ -823,12 +823,12 @@ function checkBleSupport() {
   }
 }
 
-window.onerror = function(msg, src, line) {
-  document.getElementById('status-text').textContent = 'JS-Fehler: ' + msg + ' (Z.' + line + ')';
-};
-
-document.getElementById('btn-connect').addEventListener('click', toggleConnect);
-setStatus('JS OK · BLE: ' + (navigator.bluetooth ? 'ja' : 'nein'));
+try {
+  document.getElementById('btn-connect').addEventListener('click', toggleConnect);
+  setStatus('JS OK · BLE: ' + (navigator.bluetooth ? 'ja' : 'nein'));
+} catch(e) {
+  document.getElementById('status-text').textContent += ' | catch: ' + e.name + ': ' + e.message;
+}
 </script>
 </body>
 </html>
