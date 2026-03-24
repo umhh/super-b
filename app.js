@@ -1,11 +1,4 @@
-// Error handler (must be first)
-window.onerror = function(msg, src, line, col, err) {
-  var detail = (err && err.message) ? err.message : msg;
-  var el = document.getElementById('status-text');
-  if (el) el.textContent = 'Err: ' + detail + ' Z.' + line;
-  return true;
-};
-
+(function() {
 // UUIDs
 var BLE_UUID = {
   v1: {
@@ -352,3 +345,4 @@ function setStatus(text) {
 // Init
 document.getElementById('btn-connect').addEventListener('click', toggleConnect);
 setStatus('Bereit \u00b7 BLE: ' + (navigator.bluetooth ? 'ja' : 'nein'));
+})();
