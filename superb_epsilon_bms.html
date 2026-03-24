@@ -30,7 +30,7 @@
       padding-bottom: env(safe-area-inset-bottom);
     }
 
-    /* ── Header ── */
+    /*  Header  */
     header {
       display: flex;
       align-items: center;
@@ -56,7 +56,7 @@
       margin-top: 2px;
     }
 
-    /* ── Connect Button ── */
+    /*  Connect Button  */
     #btn-connect {
       display: flex;
       align-items: center;
@@ -79,7 +79,7 @@
     #btn-connect.connecting { background: var(--yellow); }
     #btn-connect:disabled { opacity: 0.4; cursor: default; }
 
-    /* ── Bluefy Banner ── */
+    /*  Bluefy Banner  */
     #banner {
       display: flex;
       align-items: flex-start;
@@ -100,7 +100,7 @@
 
     #banner-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
 
-    /* ── Main Content ── */
+    /*  Main Content  */
     main {
       padding: 16px;
       display: flex;
@@ -108,7 +108,7 @@
       gap: 16px;
     }
 
-    /* ── SOC Gauge ── */
+    /*  SOC Gauge  */
     .gauge-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -187,7 +187,7 @@
       margin-top: 2px;
     }
 
-    /* ── Data Grid ── */
+    /*  Data Grid  */
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -236,7 +236,7 @@
     .val-red    { color: var(--red); }
     .val-blue   { color: var(--blue); }
 
-    /* ── Status Badges ── */
+    /*  Status Badges  */
     .status-row {
       display: flex;
       gap: 8px;
@@ -266,7 +266,7 @@
       background: currentColor;
     }
 
-    /* ── Placeholder / Disconnected ── */
+    /*  Placeholder / Disconnected  */
     #placeholder {
       text-align: center;
       padding: 48px 32px;
@@ -283,7 +283,7 @@
       line-height: 1.5;
     }
 
-    /* ── Footer ── */
+    /*  Footer  */
     footer {
       padding: 12px 20px;
       text-align: center;
@@ -302,7 +302,7 @@
       margin-top: 3px;
     }
 
-    /* ── Loading spinner ── */
+    /*  Loading spinner  */
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner {
       display: inline-block;
@@ -314,7 +314,7 @@
       animation: spin 0.7s linear infinite;
     }
 
-    /* ── Data hidden initially ── */
+    /*  Data hidden initially  */
     #data-section { display: none; }
   </style>
 </head>
@@ -433,7 +433,7 @@
 
 <footer>
   <div id="last-update">Noch keine Daten</div>
-  <div style="margin-top:4px; opacity:0.5">Super-B Epsilon BMS Web Reader · Build 2026-03-23 17:30</div>
+  <div style="margin-top:4px; opacity:0.5">Super-B Epsilon BMS Web Reader · Build 2026-03-24 v3</div>
 </footer>
 
 <script>
@@ -444,9 +444,8 @@ window.onerror = function(msg, src, line, col, err) {
 document.getElementById('status-text').textContent = 'Script lädt...';
 </script>
 <script>
-'use strict';
 
-// ─── UUIDs & Protokoll ──────────────────────────────────────────────────────
+// UUIDs
 
 const UUID = {
   v1: {
@@ -463,8 +462,7 @@ const UUID = {
 const CMD_V2_QUERY = new Uint8Array([0x21, 0x54, 0x00]);
 const POLL_INTERVAL_MS = 30000;
 
-// ─── State ──────────────────────────────────────────────────────────────────
-
+// State
 let bleDevice    = null;
 let gattServer   = null;
 let bmsVersion   = null;   // 'v1' | 'v2'
@@ -473,7 +471,7 @@ let v2Frame0     = null;
 let v2Frame2     = null;
 let isConnecting = false;
 
-// ─── BLE Verbindung ──────────────────────────────────────────────────────────
+// BLE Verbindung
 
 async function toggleConnect() {
   if (bleDevice && bleDevice.gatt.connected) {
@@ -513,7 +511,7 @@ async function connect() {
     bmsVersion = await detectVersion(gattServer);
     if (!bmsVersion) throw new Error('BMS-Service nicht gefunden.');
 
-    setStatus(`Verbunden · ${bmsVersion.toUpperCase()}`);
+    setStatus('Verbunden · ' + bmsVersion.toUpperCase());
     setButtonState('connected');
 
     document.getElementById('version-val').textContent = bmsVersion.toUpperCase();
@@ -563,7 +561,7 @@ function onDisconnected() {
   setStatus('Verbindung getrennt');
 }
 
-// ─── V1 Setup ────────────────────────────────────────────────────────────────
+// V1 Setup
 
 async function setupV1(server) {
   const svc  = await server.getPrimaryService(UUID.v1.service);
@@ -602,7 +600,7 @@ function handleV1Frame(view) {
   });
 }
 
-// ─── V2 Setup ────────────────────────────────────────────────────────────────
+// V2 Setup
 
 async function setupV2(server) {
   const svc     = await server.getPrimaryService(UUID.v2.service);
@@ -697,7 +695,7 @@ function parseV2Frames() {
   });
 }
 
-// ─── UI Update ───────────────────────────────────────────────────────────────
+// UI Update
 
 const SOC_CIRCUMFERENCE = 2 * Math.PI * 66;  // r=66
 
@@ -787,7 +785,7 @@ function formatRuntime(seconds) {
   return m + 'm';
 }
 
-// ─── Button States ───────────────────────────────────────────────────────────
+// Button States
 
 function setButtonState(state) {
   const btn = document.getElementById('btn-connect');
@@ -809,7 +807,7 @@ function setStatus(text) {
   document.getElementById('status-text').textContent = text;
 }
 
-// ─── Web Bluetooth Check ─────────────────────────────────────────────────────
+// Web Bluetooth Check
 
 function checkBleSupport() {
   const banner = document.getElementById('banner');
