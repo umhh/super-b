@@ -434,7 +434,7 @@
 
 <footer>
   <div id="last-update">Noch keine Daten</div>
-  <div style="margin-top:4px; opacity:0.5">Super-B Epsilon BMS Web Reader · Build 2026-03-24 v15</div>
+  <div style="margin-top:4px; opacity:0.5">Super-B Epsilon BMS Web Reader · Build 2026-03-24 v16</div>
 </footer>
 
 <script>
@@ -444,7 +444,7 @@ window.onerror = function(msg,src,line,col,err){
   document.getElementById("status-text").textContent="ERR:"+d+" Z."+line;
   return true;
 };
-document.getElementById("status-text").textContent="v15 geladen";
+document.getElementById("status-text").textContent="v16 geladen";
 </script>
 <script>
 (function() {
@@ -494,11 +494,7 @@ function connect() {
   setStatus('Suche Geraet...');
 
   navigator.bluetooth.requestDevice({
-    filters: [
-      { services: [BLE_UUID.v1.service] },
-      { services: [BLE_UUID.v2.service] },
-      { namePrefix: 'Epsilon' }
-    ],
+    acceptAllDevices: true,
     optionalServices: [BLE_UUID.v1.service, BLE_UUID.v2.service]
   }).then(function(device) {
     bleDevice = device;
