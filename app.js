@@ -7,7 +7,7 @@ window.onerror = function(msg, src, line, col, err) {
 };
 
 // UUIDs
-var UUID = {
+var BLE_UUID = {
   v1: {
     service: '74b9c2d1-dc6d-42cf-a2e9-7398b8fc2e70',
     notify:  '6edadbe4-4f53-4a5a-96ed-02f93db93790'
@@ -53,11 +53,11 @@ function connect() {
 
   navigator.bluetooth.requestDevice({
     filters: [
-      { services: [UUID.v1.service] },
-      { services: [UUID.v2.service] },
+      { services: [BLE_UUID.v1.service] },
+      { services: [BLE_UUID.v2.service] },
       { namePrefix: 'Epsilon' }
     ],
-    optionalServices: [UUID.v1.service, UUID.v2.service]
+    optionalServices: [BLE_UUID.v1.service, BLE_UUID.v2.service]
   }).then(function(device) {
     bleDevice = device;
     bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
@@ -89,10 +89,10 @@ function connect() {
 }
 
 function detectVersion(server) {
-  return server.getPrimaryService(UUID.v2.service)
+  return server.getPrimaryService(BLE_UUID.v2.service)
     .then(function() { return 'v2'; })
     ['catch'](function() {
-      return server.getPrimaryService(UUID.v1.service)
+      return server.getPrimaryService(BLE_UUID.v1.service)
         .then(function() { return 'v1'; })
         ['catch'](function() { return null; });
     });
@@ -117,10 +117,10 @@ function onDisconnected() {
 // V1
 function setupV1(server) {
   var svcRef;
-  return server.getPrimaryService(UUID.v1.service)
+  return server.getPrimaryService(BLE_UUID.v1.service)
     .then(function(svc) {
       svcRef = svc;
-      return svcRef.getCharacteristic(UUID.v1.notify);
+      return svcRef.getCharacteristic(BLE_UUID.v1.notify);
     })
     .then(function(chr) {
       chr.addEventListener('characteristicvaluechanged', function(e) {
@@ -158,14 +158,14 @@ function handleV1Frame(view) {
 // V2
 function setupV2(server) {
   var svcRef, chrTxRxRef;
-  return server.getPrimaryService(UUID.v2.service)
+  return server.getPrimaryService(BLE_UUID.v2.service)
     .then(function(svc) {
       svcRef = svc;
-      return svcRef.getCharacteristic(UUID.v2.txrx);
+      return svcRef.getCharacteristic(BLE_UUID.v2.txrx);
     })
     .then(function(chr) {
       chrTxRxRef = chr;
-      return svcRef.getCharacteristic(UUID.v2.notify2);
+      return svcRef.getCharacteristic(BLE_UUID.v2.notify2);
     })
     .then(function(chrN2) {
       chrTxRxRef.addEventListener('characteristicvaluechanged', handleV2Frame);
@@ -173,7 +173,7 @@ function setupV2(server) {
       return chrTxRxRef.startNotifications();
     })
     .then(function() {
-      return svcRef.getCharacteristic(UUID.v2.notify2);
+      return svcRef.getCharacteristic(BLE_UUID.v2.notify2);
     })
     .then(function(chrN2) {
       return chrN2.startNotifications();
@@ -184,9 +184,9 @@ function setupV2(server) {
     .then(function() {
       pollTimer = setInterval(function() {
         if (!bleDevice || !bleDevice.gatt.connected) { return; }
-        gattServer.getPrimaryService(UUID.v2.service)
+        gattServer.getPrimaryService(BLE_UUID.v2.service)
           .then(function(s) {
-            return s.getCharacteristic(UUID.v2.txrx);
+            return s.getCharacteristic(BLE_UUID.v2.txrx);
           })
           .then(function(chr) {
             return sendV2Query(chr);
