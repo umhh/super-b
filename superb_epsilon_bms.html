@@ -434,9 +434,18 @@
 
 <footer>
   <div id="last-update">Noch keine Daten</div>
-  <div style="margin-top:4px; opacity:0.5">Super-B Epsilon BMS Web Reader · Build 2026-03-24 v9</div>
+  <div style="margin-top:4px; opacity:0.5">Super-B Epsilon BMS Web Reader · Build 2026-03-24 v10</div>
 </footer>
 
+<script>
+// Block 1: läuft immer zuerst
+window.onerror = function(msg,src,line,col,err){
+  var d=(err&&err.message)?err.message:msg;
+  document.getElementById("status-text").textContent="ERR:"+d+" Z."+line;
+  return true;
+};
+document.getElementById("status-text").textContent="v10 geladen";
+</script>
 <script>
 // Error handler (must be first)
 window.onerror = function(msg, src, line, col, err) {
