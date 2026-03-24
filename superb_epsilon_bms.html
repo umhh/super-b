@@ -434,7 +434,8 @@
 
 <footer>
   <div id="last-update">Noch keine Daten</div>
-  <div style="margin-top:4px; opacity:0.5">Super-B Epsilon BMS Web Reader · Build 2026-03-24 v16</div>
+  <div style="margin-top:6px;font-size:13px;font-weight:600;opacity:0.85">Super-B Epsilon BMS Web Reader</div>
+  <div style="margin-top:3px;font-size:13px;font-weight:700;color:var(--blue)">Build 2026-03-24 v17 · 14:10</div>
 </footer>
 
 <script>
@@ -444,7 +445,7 @@ window.onerror = function(msg,src,line,col,err){
   document.getElementById("status-text").textContent="ERR:"+d+" Z."+line;
   return true;
 };
-document.getElementById("status-text").textContent="v16 geladen";
+document.getElementById("status-text").textContent="v17 geladen";
 </script>
 <script>
 (function() {
@@ -794,3 +795,4 @@ setStatus('Bereit \u00b7 BLE: ' + (navigator.bluetooth ? 'ja' : 'nein'));
 </script>
 </body>
 </html>
+
