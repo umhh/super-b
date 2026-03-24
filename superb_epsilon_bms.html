@@ -433,14 +433,10 @@
 
 <footer>
   <div id="last-update">Noch keine Daten</div>
-  <div style="margin-top:4px; opacity:0.5">Super-B Epsilon BMS Web Reader · Build 2026-03-24 v3</div>
+  <div style="margin-top:4px; opacity:0.5">Super-B Epsilon BMS Web Reader · Build 2026-03-24 v4</div>
 </footer>
 
 <script>
-window.onerror = function(msg, src, line, col, err) {
-  var el = document.getElementById('status-text');
-  if (el) el.textContent = 'Fehler Z.' + line + ': ' + msg;
-};
 document.getElementById('status-text').textContent = 'Script lädt...';
 </script>
 <script>
