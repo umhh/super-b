@@ -434,7 +434,7 @@
 
 <footer>
   <div id="last-update">Noch keine Daten</div>
-  <div style="margin-top:4px; opacity:0.5">Super-B Epsilon BMS Web Reader · Build 2026-03-24 v10</div>
+  <div style="margin-top:4px; opacity:0.5">Super-B Epsilon BMS Web Reader · Build 2026-03-24 v11</div>
 </footer>
 
 <script>
@@ -527,7 +527,7 @@ function connect() {
     } else {
       return setupV2(gattServer);
     }
-  }).catch(function(err) {
+  })['catch'](function(err) {
     setStatus('Fehler: ' + err.name + ' - ' + err.message);
     setButtonState('disconnected');
     bleDevice = null;
@@ -540,10 +540,10 @@ function connect() {
 function detectVersion(server) {
   return server.getPrimaryService(UUID.v2.service)
     .then(function() { return 'v2'; })
-    .catch(function() {
+    ['catch'](function() {
       return server.getPrimaryService(UUID.v1.service)
         .then(function() { return 'v1'; })
-        .catch(function() { return null; });
+        ['catch'](function() { return null; });
     });
 }
 
@@ -640,7 +640,7 @@ function setupV2(server) {
           .then(function(chr) {
             return sendV2Query(chr);
           })
-          .catch(function(err) {
+          ['catch'](function(err) {
             console.warn('[V2] Poll:', err);
           });
       }, POLL_INTERVAL_MS);
@@ -649,9 +649,9 @@ function setupV2(server) {
 
 function sendV2Query(chr) {
   return chr.writeValueWithResponse(CMD_V2_QUERY)
-    .catch(function() {
+    ['catch'](function() {
       return chr.writeValueWithoutResponse(CMD_V2_QUERY)
-        .catch(function(err) {
+        ['catch'](function(err) {
           console.warn('[V2] Write:', err);
         });
     });
@@ -800,7 +800,7 @@ function setStatus(text) {
 
 // Init
 document.getElementById('btn-connect').addEventListener('click', toggleConnect);
-setStatus('Bereit · BLE: ' + (navigator.bluetooth ? 'ja' : 'nein'));
+setStatus('Bereit \u00b7 BLE: ' + (navigator.bluetooth ? 'ja' : 'nein'));
 </script>
 </body>
 </html>
