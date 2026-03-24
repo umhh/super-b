@@ -433,13 +433,15 @@
 
 <footer>
   <div id="last-update">Noch keine Daten</div>
-  <div style="margin-top:4px; opacity:0.5">Super-B Epsilon BMS Web Reader · Build 2026-03-24 v4</div>
+  <div style="margin-top:4px; opacity:0.5">Super-B Epsilon BMS Web Reader · Build 2026-03-24 v5</div>
 </footer>
 
 <script>
 document.getElementById('status-text').textContent = 'Script lädt...';
 </script>
 <script>
+// TEIL A: Deklarationen + V1-Funktionen
+
 
 // UUIDs
 
@@ -596,7 +598,10 @@ function handleV1Frame(view) {
   });
 }
 
-// V2 Setup
+document.getElementById('status-text').textContent = 'A-OK';
+</script>
+<script>
+// TEIL B: V2-Funktionen + UI
 
 async function setupV2(server) {
   const svc     = await server.getPrimaryService(UUID.v2.service);
@@ -822,6 +827,7 @@ window.onerror = function(msg, src, line) {
   document.getElementById('status-text').textContent = 'JS-Fehler: ' + msg + ' (Z.' + line + ')';
 };
 
+document.getElementById('status-text').textContent = 'B-OK';
 document.getElementById('btn-connect').addEventListener('click', toggleConnect);
 setStatus('JS OK · BLE: ' + (navigator.bluetooth ? 'ja' : 'nein'));
 </script>
