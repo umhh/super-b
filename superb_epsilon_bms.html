@@ -56,6 +56,40 @@
       margin-top: 2px;
     }
 
+    /*  PIN Row  */
+    #pin-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    #pin-row.hidden { display: none; }
+
+    #pin-row label {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    #pin-input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 15px;
+      font-family: inherit;
+      padding: 5px 10px;
+      width: 110px;
+      letter-spacing: 2px;
+      -webkit-appearance: none;
+    }
+
+    #pin-input:focus {
+      outline: none;
+      border-color: var(--blue);
+    }
+
     /*  Connect Button  */
     #btn-connect {
       display: flex;
@@ -322,9 +356,13 @@
 <body>
 
 <header>
-  <div>
+  <div style="flex:1">
     <h1>Super-B Epsilon BMS</h1>
     <p id="status-text">Nicht verbunden</p>
+    <div id="pin-row">
+      <label for="pin-input">PIN</label>
+      <input id="pin-input" type="password" inputmode="numeric" maxlength="8" placeholder="optional" autocomplete="off">
+    </div>
   </div>
   <button id="btn-connect">
     Verbinden
@@ -435,7 +473,7 @@
 <footer>
   <div id="last-update">Noch keine Daten</div>
   <div style="margin-top:6px;font-size:13px;font-weight:600;opacity:0.85">Super-B Epsilon BMS Web Reader</div>
-  <div style="margin-top:3px;font-size:13px;font-weight:700;color:var(--blue)">Build 2026-03-24 v18 · 14:35</div>
+  <div style="margin-top:3px;font-size:13px;font-weight:700;color:var(--blue)">Build 2026-03-29 v19 · 10:00</div>
 </footer>
 
 <script>
@@ -445,7 +483,7 @@ window.onerror = function(msg,src,line,col,err){
   document.getElementById("status-text").textContent="ERR:"+d+" Z."+line;
   return true;
 };
-document.getElementById("status-text").textContent="v18 geladen";
+document.getElementById("status-text").textContent="v19 geladen";
 </script>
 <script>
 (function() {
@@ -618,6 +656,12 @@ function setupV2(server) {
       return chrN2.startNotifications();
     })
     .then(function() {
+      var pin = document.getElementById('pin-input').value.trim();
+      if (pin) {
+        return sendPin(chrTxRxRef, pin);
+      }
+    })
+    .then(function() {
       return sendV2Query(chrTxRxRef);
     })
     .then(function() {
@@ -634,6 +678,21 @@ function setupV2(server) {
             console.warn('[V2] Poll:', err);
           });
       }, POLL_INTERVAL_MS);
+    });
+}
+
+function sendPin(chr, pin) {
+  var bytes = [];
+  for (var i = 0; i < pin.length; i++) {
+    bytes.push(pin.charCodeAt(i));
+  }
+  var cmd = new Uint8Array(bytes);
+  return chr.writeValueWithResponse(cmd)
+    ['catch'](function() {
+      return chr.writeValueWithoutResponse(cmd)
+        ['catch'](function(err) {
+          console.warn('[V2] PIN:', err);
+        });
     });
 }
 
@@ -770,17 +829,21 @@ function formatRuntime(seconds) {
 
 function setButtonState(state) {
   var btn = document.getElementById('btn-connect');
+  var pinRow = document.getElementById('pin-row');
   btn.classList.remove('connected', 'connecting');
   btn.disabled = false;
   if (state === 'connected') {
     btn.classList.add('connected');
     btn.textContent = 'Trennen';
+    pinRow.classList.add('hidden');
   } else if (state === 'connecting') {
     btn.classList.add('connecting');
     btn.innerHTML = '<span class="spinner"></span>';
     btn.disabled = true;
+    pinRow.classList.add('hidden');
   } else {
     btn.textContent = 'Verbinden';
+    pinRow.classList.remove('hidden');
   }
 }
 
