@@ -10,15 +10,18 @@ https://umhh.github.io/super-b/superb_epsilon_bms.html
 https://github.com/umhh/super-b
 
 ## Aktueller Stand
-- **Version:** v18
+- **Version:** v19
 - **Branch `main`** ist aktuell und wird über GitHub Pages ausgeliefert
 - **Dateien:** `superb_epsilon_bms.html` (21 KB, alles inline), `README.md`
 - `app.js` wurde entfernt (war ab v15 nicht mehr in Verwendung)
 
 ## Entwicklungs-Workflow
-1. Änderungen auf Branch `claude/setup-repo-access-PXR2i` entwickeln
+1. Änderungen auf Feature-Branch entwickeln
 2. Commit & Push auf diesen Branch
-3. PR erstellen und in `main` mergen (squash)
+3. Nach jeder abgeschlossenen Anpassung den Nutzer fragen, ob PR erstellt und in `main` gemergt (squash) werden soll – niemals automatisch mergen
+
+## Versionshinweise
+- Versionsnummer im Footer und im JS (`v18 geladen` etc.) bei jeder Änderung erhöhen
 
 ## Wichtige technische Hinweise (Bluefy-Kompatibilität)
 - Kein `async/await` – nur Promise-Chains
@@ -30,6 +33,7 @@ https://github.com/umhh/super-b
 - JS muss inline im HTML sein (kein externes Script – CDN-Caching-Problem)
 
 ## Versionshistorie (Kurzfassung)
+- v19: PIN-Eingabefeld vor dem BLE-Connect
 - v18: Versionsnummer erhöht
 - v17: Größere fette Build-Info mit Zeit im Footer
 - v16: acceptAllDevices für BLE-Gerätepicker
