@@ -473,7 +473,7 @@
 <footer>
   <div id="last-update">Noch keine Daten</div>
   <div style="margin-top:6px;font-size:13px;font-weight:600;opacity:0.85">Super-B Epsilon BMS Web Reader</div>
-  <div style="margin-top:3px;font-size:13px;font-weight:700;color:var(--blue)">Build 2026-03-31 v22 · 10:00</div>
+  <div style="margin-top:3px;font-size:13px;font-weight:700;color:var(--blue)">Build 2026-03-31 v23 · 10:00</div>
 </footer>
 
 <script>
@@ -483,7 +483,7 @@ window.onerror = function(msg,src,line,col,err){
   document.getElementById("status-text").textContent="ERR:"+d+" Z."+line;
   return true;
 };
-document.getElementById("status-text").textContent="v22 geladen";
+document.getElementById("status-text").textContent="v23 geladen";
 </script>
 <script>
 (function() {
@@ -539,7 +539,7 @@ function connect() {
     bleDevice = device;
     bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
     setStatus('Verbinde...');
-    return connectWithRetry(bleDevice, 3);
+    return connectWithRetry(bleDevice, 10);
   }).then(function(server) {
     gattServer = server;
     return detectVersion(gattServer);
@@ -573,12 +573,14 @@ function connect() {
   });
 }
 
+var CONNECT_MAX_RETRIES = 10;
 function connectWithRetry(device, retriesLeft) {
   return device.gatt.connect()['catch'](function(err) {
     if (retriesLeft > 0) {
-      setStatus('Verbinde... (Versuch ' + (4 - retriesLeft) + ')');
+      var attempt = CONNECT_MAX_RETRIES - retriesLeft + 1;
+      setStatus('Verbinde... (' + attempt + '/' + CONNECT_MAX_RETRIES + ')');
       return new Promise(function(resolve) {
-        setTimeout(resolve, 1500);
+        setTimeout(resolve, 5000);
       }).then(function() {
         return connectWithRetry(device, retriesLeft - 1);
       });
