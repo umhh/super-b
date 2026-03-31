@@ -473,7 +473,7 @@
 <footer>
   <div id="last-update">Noch keine Daten</div>
   <div style="margin-top:6px;font-size:13px;font-weight:600;opacity:0.85">Super-B Epsilon BMS Web Reader</div>
-  <div style="margin-top:3px;font-size:13px;font-weight:700;color:var(--blue)">Build 2026-03-29 v19 · 10:00</div>
+  <div style="margin-top:3px;font-size:13px;font-weight:700;color:var(--blue)">Build 2026-03-31 v20 · 10:00</div>
 </footer>
 
 <script>
@@ -483,7 +483,7 @@ window.onerror = function(msg,src,line,col,err){
   document.getElementById("status-text").textContent="ERR:"+d+" Z."+line;
   return true;
 };
-document.getElementById("status-text").textContent="v19 geladen";
+document.getElementById("status-text").textContent="v20 geladen";
 </script>
 <script>
 (function() {
@@ -556,7 +556,8 @@ function connect() {
       return setupV2(gattServer);
     }
   })['catch'](function(err) {
-    setStatus('Fehler: ' + err.name + ' - ' + err.message);
+    var msg = err ? (err.message || err.name || err.toString() || 'unbekannt') : 'unbekannt';
+    setStatus('Fehler: ' + msg);
     setButtonState('disconnected');
     bleDevice = null;
     isConnecting = false;
