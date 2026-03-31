@@ -473,7 +473,7 @@
 <footer>
   <div id="last-update">Noch keine Daten</div>
   <div style="margin-top:6px;font-size:13px;font-weight:600;opacity:0.85">Super-B Epsilon BMS Web Reader</div>
-  <div style="margin-top:3px;font-size:13px;font-weight:700;color:var(--blue)">Build 2026-03-31 v20 · 10:00</div>
+  <div style="margin-top:3px;font-size:13px;font-weight:700;color:var(--blue)">Build 2026-03-31 v22 · 10:00</div>
 </footer>
 
 <script>
@@ -483,7 +483,7 @@ window.onerror = function(msg,src,line,col,err){
   document.getElementById("status-text").textContent="ERR:"+d+" Z."+line;
   return true;
 };
-document.getElementById("status-text").textContent="v20 geladen";
+document.getElementById("status-text").textContent="v22 geladen";
 </script>
 <script>
 (function() {
@@ -539,7 +539,7 @@ function connect() {
     bleDevice = device;
     bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
     setStatus('Verbinde...');
-    return bleDevice.gatt.connect();
+    return connectWithRetry(bleDevice, 3);
   }).then(function(server) {
     gattServer = server;
     return detectVersion(gattServer);
@@ -556,13 +556,34 @@ function connect() {
       return setupV2(gattServer);
     }
   })['catch'](function(err) {
-    var msg = err ? (err.message || err.name || err.toString() || 'unbekannt') : 'unbekannt';
+    var msg = 'unbekannt';
+    if (err != null) {
+      if (typeof err === 'string' && err) { msg = err; }
+      else if (typeof err === 'number') { msg = 'Code ' + err; }
+      else if (err.message) { msg = err.message; }
+      else if (err.name) { msg = err.name; }
+      else { msg = String(err); }
+    }
     setStatus('Fehler: ' + msg);
     setButtonState('disconnected');
     bleDevice = null;
     isConnecting = false;
   }).then(function() {
     isConnecting = false;
+  });
+}
+
+function connectWithRetry(device, retriesLeft) {
+  return device.gatt.connect()['catch'](function(err) {
+    if (retriesLeft > 0) {
+      setStatus('Verbinde... (Versuch ' + (4 - retriesLeft) + ')');
+      return new Promise(function(resolve) {
+        setTimeout(resolve, 1500);
+      }).then(function() {
+        return connectWithRetry(device, retriesLeft - 1);
+      });
+    }
+    throw err;
   });
 }
 
